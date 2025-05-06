@@ -15,7 +15,7 @@
 - **Frontend:** React.js, TailwindCSS
 - **Backend:** Node.js, Express.js, WebSockets
 - **Code Execution:** Docker, Kubernetes
-- **Deployment:** GCP / Any Kubernetes-compatible cloud provider
+- **Deployment:** GCP
 - **Version Control:** Git, GitHub
 
 ## 🛠️ Installation (Dev Mode)
