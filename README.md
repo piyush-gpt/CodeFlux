@@ -16,7 +16,7 @@
 - **Backend:** Node.js, Express.js, WebSockets
 - **Code Execution:** Docker, Kubernetes
 - **Deployment:** GCP
-- **Object Storage:** CloudFare R2 with S3 compatbility
+- **Object Storage:** CloudFlare R2 with S3 compatibility
 - **Version Control:** Git, GitHub
 
 ## 🛠️ Installation (Dev Mode)
