@@ -57,6 +57,7 @@ const Terminal = ({ socket }) => {
 
       // Handle terminal input
       xtermRef.current.onData(data => {
+        console.log('Terminal input:', data);
         socket.emit('terminal:input', data);
       });
 

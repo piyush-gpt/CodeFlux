@@ -66,6 +66,24 @@ export default function initSocket(io) {
       }
     });
 
+    socket.workerSocket.on("saveFile", async ({ filePath, content }) => {
+      try {
+
+        console.log("Received file save request from worker, saving to R2");
+  
+        // Save the updated package.json to R2
+        const result = await saveToS3(socket.ownerId, socket.repl_id, filePath, content);
+        if (result.success) {
+          console.log("Successfully saved package.json to R2");
+        } else {
+          console.error("Failed to save package.json to R2:", result.error);
+        }
+      } catch (error) {
+        console.error("Error saving package.json to R2:", error);
+      }
+    });
+    
+    
     // Handle client disconnection
     socket.on('disconnect', () => {
       console.log(`🔴 Client disconnected: ${socket.id}, User: ${socket.userId}, Repl: ${socket.repl_id}`);

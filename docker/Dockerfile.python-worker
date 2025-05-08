@@ -1,0 +1,41 @@
+# Use Node.js as the base image
+FROM node:20
+
+WORKDIR /app
+
+# Install system dependencies for node-pty and Python
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-venv \
+    make \
+    g++ \
+    build-essential \
+    bash \
+    && ln -s /usr/bin/python3 /usr/bin/python \
+    && rm -rf /var/lib/apt/lists/*
+
+
+COPY worker-python/ ./  
+
+# Remove any prebuilt node_modules (just in case)
+RUN rm -rf node_modules
+
+# Install Node.js dependencies
+RUN npm install --build-from-source
+
+# Create a virtual environment in /venv
+RUN python3 -m venv /venv
+
+# Activate the virtual environment globally by updating the PATH
+ENV PATH="/venv/bin:$PATH"
+
+
+# Setup workspace for user code
+RUN mkdir -p /workspace && chmod 777 /workspace
+
+# Expose ports for communication
+EXPOSE 3002
+
+# Start the Node.js worker (handles socket communication)
+CMD ["node", "index.js"]

@@ -457,7 +457,15 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
                 Preview
               </button>
               <button
-                onClick={() => {/* TODO: Add run functionality */ }}
+                onClick={() => {
+                  if (currentFile && currentFile.name.endsWith('.cpp')) {
+                    // Remove workspace/ prefix if it exists
+                    const filePath = currentFile.path.replace(/^workspace\//, '');
+                    // Just send the file path to the worker
+                    const compileCommand = `g++ "${filePath}"\r`;
+                    socket.emit('terminal:input', compileCommand);
+                  }
+                }}
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

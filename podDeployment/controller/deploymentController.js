@@ -108,6 +108,12 @@ export async function deployRepl(userId, replId, language) {
   if (language.toLowerCase() === 'react' || language.toLowerCase() === 'reactjs') {
     workerImage = 'piyushgpt/repl-worker';
   }
+  if(language.toLowerCase()==='python' || language.toLowerCase()==='python3'){
+    workerImage = 'piyushgpt/repl-worker-python';
+  }
+  if(language.toLowerCase()==='cpp' || language.toLowerCase()==='c++'){
+    workerImage = 'piyushgpt/repl-worker-cpp';
+  }
 
   const podManifest = {
     apiVersion: 'v1',

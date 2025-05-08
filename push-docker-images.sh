@@ -9,6 +9,8 @@ DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME:-"piyushgpt"}
 # Default image names and tags
 RUNNER_IMAGE="${DOCKERHUB_USERNAME}/repl-runner:latest"
 WORKER_IMAGE="${DOCKERHUB_USERNAME}/repl-worker:latest"
+PYTHON_WORKER_IMAGE="${DOCKERHUB_USERNAME}/repl-worker-python:latest"
+CPP_WORKER_IMAGE="${DOCKERHUB_USERNAME}/repl-worker-cpp:latest"
 
 # Display usage information
 show_usage() {
@@ -29,6 +31,8 @@ while [[ $# -gt 0 ]]; do
             DOCKERHUB_USERNAME="$2"
             RUNNER_IMAGE="${DOCKERHUB_USERNAME}/repl-runner:latest"
             WORKER_IMAGE="${DOCKERHUB_USERNAME}/repl-worker:latest"
+            PYTHON_WORKER_IMAGE="${DOCKERHUB_USERNAME}/repl-worker-python:latest"
+            CPP_WORKER_IMAGE="${DOCKERHUB_USERNAME}/repl-worker-cpp:latest"
             shift 2
             ;;
         -r|--runner-tag)
@@ -37,6 +41,8 @@ while [[ $# -gt 0 ]]; do
             ;;
         -w|--worker-tag)
             WORKER_IMAGE="${DOCKERHUB_USERNAME}/repl-worker:$2"
+            PYTHON_WORKER_IMAGE="${DOCKERHUB_USERNAME}/repl-worker-python:$2"
+            CPP_WORKER_IMAGE="${DOCKERHUB_USERNAME}/repl-worker-cpp:$2"
             shift 2
             ;;
         -h|--help)
@@ -62,10 +68,16 @@ fi
 
 # Build the images
 echo "Building runner image..."
-docker build -t ${RUNNER_IMAGE} -f docker-react/Dockerfile.runner .
+docker build -t ${RUNNER_IMAGE} -f docker/Dockerfile.runner .
 
 echo "Building worker image..."
-docker build -t ${WORKER_IMAGE} -f docker-react/Dockerfile.worker .
+docker build -t ${WORKER_IMAGE} -f docker/Dockerfile.worker .
+
+echo "Building Python worker image..."
+docker build -t ${PYTHON_WORKER_IMAGE} -f docker/Dockerfile.python-worker .
+
+echo "Building C++ worker image..."
+docker build -t ${CPP_WORKER_IMAGE} -f docker/Dockerfile.worker.cpp .
 
 # Push the images to DockerHub
 echo "Pushing runner image to DockerHub..."
@@ -73,7 +85,14 @@ docker push ${RUNNER_IMAGE}
 
 echo "Pushing worker image to DockerHub..."
 docker push ${WORKER_IMAGE}
+echo "Pushing Python worker image to DockerHub..."
+docker push ${PYTHON_WORKER_IMAGE}
+
+echo "Pushing C++ worker image to DockerHub..."
+docker push ${CPP_WORKER_IMAGE}
 
 echo "Images successfully pushed to DockerHub!"
 echo "Runner: ${RUNNER_IMAGE}"
 echo "Worker: ${WORKER_IMAGE}" 
+echo "Python Worker: ${PYTHON_WORKER_IMAGE}"
+echo "C++ Worker: ${CPP_WORKER_IMAGE}"  

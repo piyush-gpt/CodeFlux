@@ -10,18 +10,18 @@ const normalizePath = (dirPath) => {
   if (dirPath === 'workspace' || dirPath === '/workspace' || dirPath === 'workspace/') {
     return '/workspace';
   }
-
+  
   // For paths within workspace
   if (dirPath.includes('workspace/')) {
     return dirPath.startsWith('/') ? dirPath : `/${dirPath}`;
   }
-
+  
   // For any other path, prefix with /workspace/
   return `/workspace/${dirPath.replace(/^\//, '')}`;
 };
 
-
-export default function initSocket(io) {
+// Setup file watcher for package.json
+export default function initSocket (io) {
   io.use((socket, next) => {
     const { userId, repl_id } = socket.handshake.query;
     if (userId && repl_id) {
@@ -37,7 +37,7 @@ export default function initSocket(io) {
   io.on('connection', (socket) => {
     console.log('Worker socket connected:', socket.id);
     let inputBuffer = '';
-
+    
     // Handle runnerLoaded event - sends file tree data to the client
     socket.on("runnerLoaded", async () => {
       console.log(`Worker: runnerLoaded received from socket ${socket.id}`);
@@ -45,7 +45,7 @@ export default function initSocket(io) {
         // Get root workspace contents
         const rootContent = await fetchDir("/workspace");
         console.log(`Worker: Fetched ${rootContent.length} items from workspace`);
-
+        
         // Send data to the client
         socket.emit("loaded", {
           rootContent: rootContent,
@@ -71,7 +71,7 @@ export default function initSocket(io) {
       try {
         // Get or create a terminal instance
         ptyProcess = terminal.getTerminal(sessionId, dimensions || { cols: 80, rows: 24 });
-
+        
         // Only register the data handler if it hasn't been already
         if (!dataHandlerRegistered) {
           // Listen for output from the terminal and send it to the client
@@ -86,7 +86,6 @@ export default function initSocket(io) {
       }
     });
 
-    
     socket.on('terminal:input', (data) => {
       try {
         if (!ptyProcess) {
@@ -104,69 +103,42 @@ export default function initSocket(io) {
 
         // Append the incoming data to the buffer
         inputBuffer += data;
-
+        console.log(`Received data: ${data}`);
         // Check if the user pressed "Enter" (newline character)
         if (data.includes('\r')) {
           const command = inputBuffer.trim(); // Get the full command
           inputBuffer = ''; // Clear the buffer
 
           console.log(`Received full command: ${command}`);
-          const requirementsPath = path.join('/workspace', 'requirements.txt');
 
-          // Ensure the requirements.txt file exists
-          if (!fs.existsSync(requirementsPath)) {
-            fs.writeFileSync(requirementsPath, '', 'utf8');
-          }
-
-
-          if (command.startsWith('pip install')) {
-            const currentRequirements = fs.readFileSync(requirementsPath, 'utf8').split('\n').filter(Boolean);
-            const packageNames = command.split(' ').slice(2); // Extract package names
+          // Handle C++ compilation and execution
+          if (command.startsWith('g++')) {
+            // Extract the source file path from the command
+            const sourceFile = command.split(' ')[1].replace(/"/g, ''); // Remove quotes
+            // Remove workspace/ prefix if it exists
+            const cleanSourceFile = sourceFile.replace(/^workspace\//, '');
+            // Use absolute paths
+            const absoluteSourceFile = path.join('/workspace', cleanSourceFile);
+            const sourceDir = path.dirname(absoluteSourceFile);
+            const outputFile = path.join(sourceDir, 'a.out');
             
-            // Handle pip install -r requirements.txt
-            if (packageNames[0] === '-r' && packageNames[1] === 'requirements.txt') {
-              // Read all packages from requirements.txt
-              const packagesToInstall = currentRequirements;
-              if (packagesToInstall.length > 0) {
-                console.log(`Installing packages from requirements.txt: ${packagesToInstall.join(', ')}`);
-                // Forward the command to the terminal
-                terminal.writeToTerminal(sessionId, data);
-              } else {
-                console.log('No packages found in requirements.txt');
-                socket.emit('terminal:output', 'No packages found in requirements.txt\r\n');
-              }
-            } else if (packageNames.length > 0) {
-              packageNames.forEach((pkg) => {
-                if (!currentRequirements.includes(pkg)) {
-                  fs.appendFileSync(requirementsPath, `${pkg}\n`, 'utf8');
-                  console.log(`Added ${pkg} to requirements.txt`);
-                }
-              });
-              // Send the updated requirements.txt to the runner socket
-              const updatedRequirementsContent = fs.readFileSync(requirementsPath, 'utf8');
-              socket.emit('saveFile', {
-                filePath: 'requirements.txt',
-                content: updatedRequirementsContent,
-              });
+            // Check if this is a manual terminal input (contains -o flag)
+            const isManualInput = command.includes('-o');
+            
+            if (isManualInput) {
+              // If it's manual input, just forward the command as is
+              terminal.writeToTerminal(sessionId, data);
+            } else {
+              // If it's from Run button, create the full compilation command with absolute paths
+              console.log(`Compiling ${absoluteSourceFile} to ${outputFile}`);
+              const fullCompileCommand = `g++ "${absoluteSourceFile}" -o "${outputFile}" && cd "${sourceDir}" && ./a.out && rm "${outputFile}"\r`;
+              console.log(`Full command: ${fullCompileCommand}`);
+              terminal.writeToTerminal(sessionId, fullCompileCommand);
             }
-          } else if (command.startsWith('pip uninstall')) {
-            const currentRequirements = fs.readFileSync(requirementsPath, 'utf8').split('\n').filter(Boolean);
-            const packageNames = command.split(' ').slice(2); // Extract package names
-            if (packageNames.length > 0) {
-              const updatedRequirements = currentRequirements.filter((pkg) => !packageNames.includes(pkg));
-              fs.writeFileSync(requirementsPath, updatedRequirements.join('\n') + '\n', 'utf8');
-              console.log(`Removed ${packageNames.join(', ')} from requirements.txt`);
-              // Send the updated requirements.txt to the runner socket
-              const updatedRequirementsContent = fs.readFileSync(requirementsPath, 'utf8');
-              socket.emit('saveFile', {
-                filePath: 'requirements.txt',
-                content: updatedRequirementsContent,
-              });
-            }
+          } else {
+            // Forward other commands to the terminal
+            terminal.writeToTerminal(sessionId, data);
           }
-
-          // Forward the full command to the terminal
-          terminal.writeToTerminal(sessionId, data);
         } else {
           // Forward the character to the terminal for real-time display
           terminal.writeToTerminal(sessionId, data);
@@ -192,14 +164,14 @@ export default function initSocket(io) {
 
     // Set up other handlers
     initHandlers(socket, socket.userId, socket.repl_id);
-
+    
     // Handle socket disconnection
     socket.on('disconnect', () => {
       console.log('Client disconnected from worker:', socket.id);
       // Don't kill the terminal on disconnect to allow reconnection
     });
   });
-
+  
   // Start cleanup interval for inactive terminals (15 min)
   terminal.startCleanupInterval();
 };
@@ -229,7 +201,7 @@ function initHandlers(socket, userId, repl_id) {
       callback('');
     }
   });
-
+  
   // Handler for writeFile event from runner
   socket.on("writeFile", async ({ filePath, content }, callback) => {
     try {
@@ -242,30 +214,30 @@ function initHandlers(socket, userId, repl_id) {
       callback({ success: false, error: error.message });
     }
   });
-
+  
   socket.on("createFile", async (newPath, type, callback) => {
     try {
       const normalizedPath = normalizePath(newPath);
       const isFolder = type === 'folder';
-
+      
       console.log(`Creating ${type}: ${normalizedPath}`);
       await createFile(normalizedPath, isFolder);
-
+      
       if (callback) callback({ success: true });
     } catch (error) {
       console.error(`Error creating ${newPath}:`, error);
       if (callback) callback({ success: false, error: error.message });
     }
   });
-
+  
   // Handler for deleteFile event from runner
   socket.on("deleteFile", async (targetPath, callback) => {
     try {
       const normalizedPath = normalizePath(targetPath);
-
+      
       console.log(`Deleting: ${normalizedPath}`);
       await deleteFile(normalizedPath);
-
+      
       if (callback) callback({ success: true });
     } catch (error) {
       console.error(`Error deleting ${targetPath}:`, error);
@@ -273,3 +245,4 @@ function initHandlers(socket, userId, repl_id) {
     }
   });
 }
+  
