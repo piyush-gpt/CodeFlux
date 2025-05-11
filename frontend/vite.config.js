@@ -41,7 +41,7 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.js'],
     css: false,
     deps: {
-      inline: [/tailwindcss/, /@tailwindcss/]
+      inline: [/tailwindcss/, /@tailwindcss/, /\.css$/]
     }
   },
 })
