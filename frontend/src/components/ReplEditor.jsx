@@ -109,7 +109,7 @@ const ReplEditor = () => {
       try {
         setPodCreating(true);
         console.log("Creating pod...12");
-        const response = await axios.post(`${process.env.REACT_APP_POD_DEPLOYMENT_URL}/api/deploy`, {
+        const response = await axios.post(`http://localhost:4001/api/deploy`, {
           userId: ownerId, // Use the owner's ID here
           replId: id,
           language: lang,
@@ -488,25 +488,25 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700 p-4 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-          <button
+            <div className="flex items-center space-x-4">
+              <button
               onClick={() => navigate(-1)}
               className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
               title="Go back"
-            >
+              >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
+                </svg>
+              </button>
             <Code className="h-6 w-6 text-blue-500" />
             <h1 className="text-xl font-semibold">{repl?.name || 'Untitled Project'}</h1>
-            {unsavedFiles.size > 0 && (
+                {unsavedFiles.size > 0 && (
               <span className="text-sm text-yellow-400 flex items-center gap-1">
                 <Save size={14} />
                 {unsavedFiles.size} unsaved {unsavedFiles.size === 1 ? 'file' : 'files'}
-              </span>
-            )}
-          </div>
+                </span>
+              )}
+            </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowAI(!showAI)}
@@ -516,14 +516,14 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
             >
               <Brain className="h-5 w-5" />
             </button>
-            <button
-              onClick={toggleTerminal}
+              <button
+                onClick={toggleTerminal}
               className={`p-2 rounded-lg transition-colors ${
                 showTerminal ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'
               }`}
-            >
+              >
               <TerminalIcon className="h-5 w-5" />
-            </button>
+              </button>
             
               <button
                 onClick={togglePreview}
@@ -534,12 +534,12 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
                 <Eye className="h-5 w-5" />
               </button>
           
-            <button
-              onClick={handleRun}
+              <button
+                onClick={handleRun}
               className="p-2 rounded-lg bg-green-500 hover:bg-green-600 text-white transition-colors"
-            >
+              >
               <Play className="h-5 w-5" />
-            </button>
+              </button>
           </div>
         </div>
       </header>
@@ -552,15 +552,15 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
           animate={{ width: 250, opacity: 1 }}
           className="bg-gray-800 border-r border-gray-700"
         >
-          <FileTreeExplorer onFileSelect={handleFileSelect} socket={socket} />
+        <FileTreeExplorer onFileSelect={handleFileSelect} socket={socket} />
         </motion.div>
 
         {/* Editor and AI Assistant */}
         <div className="flex-1 flex relative">
-          <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col">
             <div className="flex-1 relative">
               <AnimatePresence mode="wait">
-                {currentFile ? (
+            {currentFile ? (
                   <motion.div
                     key={currentFile.path}
                     initial={{ opacity: 0 }}
@@ -568,20 +568,20 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
                     exit={{ opacity: 0 }}
                     className="absolute inset-0"
                   >
-                    <Editor
-                      height="100%"
-                      value={fileContent}
-                      onChange={handleEditorChange}
-                      onMount={handleEditorDidMount}
+              <Editor
+                height="100%"
+                value={fileContent}
+                onChange={handleEditorChange}
+                onMount={handleEditorDidMount}
                       theme="vs-dark"
-                      options={{
-                        minimap: { enabled: false },
-                        fontSize: 14,
-                        wordWrap: 'on',
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  wordWrap: 'on',
                         lineNumbers: 'on',
                         renderWhitespace: 'selection',
                         scrollBeyondLastLine: false,
-                        automaticLayout: true,
+                  automaticLayout: true,
                         cursorStyle: 'line',
                         cursorBlinking: 'smooth',
                         cursorSmoothCaretAnimation: 'on',
@@ -663,9 +663,9 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
                           showVariables: true
                         }
                       }}
-                    />
+              />
                   </motion.div>
-                ) : (
+            ) : (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -714,14 +714,14 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
                       <ExternalLink className="h-4 w-4" />
                       Open in new tab
                     </a>
-                  </div>
+              </div>
                   <iframe
                     src={`http://${domain}/preview`}
                     className="w-full h-full"
                     title="Preview"
                   />
                 </motion.div>
-              )}
+            )}
             </AnimatePresence>
           </div>
 
@@ -741,14 +741,14 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
                 >
                   <GripVertical className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 </div>
-                {isEditorMounted && (
-                  <AIAssistant
-                    currentFile={currentFile}
-                    fileContent={fileContent}
-                    onApplyChanges={handleEditorChange}
-                    editorRef={editorRef}
-                  />
-                )}
+          {isEditorMounted && (
+            <AIAssistant
+              currentFile={currentFile}
+              fileContent={fileContent}
+              onApplyChanges={handleEditorChange}
+              editorRef={editorRef}
+            />
+          )}
               </motion.div>
             )}
           </AnimatePresence>

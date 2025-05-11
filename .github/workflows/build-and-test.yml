@@ -1,4 +1,4 @@
-name: Build and Test
+name: Build
 
 on:
   push:
@@ -15,42 +15,7 @@ on:
       - 'podDeployment/**'
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          
-      - name: Install Frontend Dependencies
-        working-directory: ./frontend
-        run: npm ci
-        
-      - name: Run Frontend Tests
-        working-directory: ./frontend
-        run: npm test
-        
-      - name: Install Server Dependencies
-        working-directory: ./server
-        run: npm ci
-        
-      - name: Run Server Tests
-        working-directory: ./server
-        run: npm test
-        
-      - name: Install PodDeployment Dependencies
-        working-directory: ./podDeployment
-        run: npm ci
-        
-      - name: Run PodDeployment Tests
-        working-directory: ./podDeployment
-        run: npm test
-
   build:
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

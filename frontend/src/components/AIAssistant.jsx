@@ -86,7 +86,7 @@ const AIAssistant = ({ currentFile, fileContent, onApplyChanges, editorRef }) =>
 
   const streamResponse = async (endpoint, data) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/ai/${endpoint}`, {
+      const response = await fetch(`http://localhost:3000/api/ai/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ const AIAssistant = ({ currentFile, fileContent, onApplyChanges, editorRef }) =>
     console.log('Completing code at position:', position);
     
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/ai/complete`, {
+      const response = await fetch(`http://localhost:3000/api/ai/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

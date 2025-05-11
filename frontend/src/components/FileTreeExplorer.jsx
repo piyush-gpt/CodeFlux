@@ -322,14 +322,14 @@ export default function FileTreeExplorer({ onFileSelect, socket }) {
       <div className="p-4 border-b border-gray-700">
         <h2 className="text-sm font-semibold text-gray-400 mb-2">EXPLORER</h2>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => addItem("workspace", "file")}
+        <button
+          onClick={() => addItem("workspace", "file")}
             className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
-          >
+        >
             <FilePlus size={16} />
-          </button>
-          <button
-            onClick={() => addItem("workspace", "folder")}
+        </button>
+        <button
+          onClick={() => addItem("workspace", "folder")}
             className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
           >
             <FolderPlus size={16} />
@@ -340,7 +340,7 @@ export default function FileTreeExplorer({ onFileSelect, socket }) {
             title="Refresh file tree"
           >
             <RefreshCw size={16} />
-          </button>
+        </button>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-2">
