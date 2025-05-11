@@ -109,7 +109,7 @@ const ReplEditor = () => {
       try {
         setPodCreating(true);
         console.log("Creating pod...12");
-        const response = await axios.post(`http://localhost:4001/api/deploy`, {
+        const response = await axios.post(`${process.env.REACT_APP_POD_DEPLOYMENT_URL}/api/deploy`, {
           userId: ownerId, // Use the owner's ID here
           replId: id,
           language: lang,
