@@ -1,12 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import './mocks';
-
-// Mock all CSS imports
-vi.mock('*.css', () => ({}));
-vi.mock('*.scss', () => ({}));
-vi.mock('tailwindcss', () => ({}));
+import './mocks/index.js';
 
 // Custom render function that includes providers
 function customRender(ui, options = {}) {

@@ -1,12 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
-    tailwindcss()
+    react()
   ],
   build: {
     target: 'esnext',
@@ -41,7 +39,10 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.js'],
     css: false,
     deps: {
-      inline: [/tailwindcss/, /@tailwindcss/, /\.css$/]
+      inline: [/\.css$/]
+    },
+    transformMode: {
+      web: [/\.[jt]sx?$/]
     }
   },
 })
