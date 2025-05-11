@@ -3,9 +3,20 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
-// Mock the Monaco Editor component since it's not needed for basic tests
+// Mock the Monaco Editor component
 vi.mock('@monaco-editor/react', () => ({
   default: () => <div data-testid="monaco-editor">Monaco Editor</div>
+}));
+
+// Mock xterm
+vi.mock('xterm', () => ({
+  Terminal: vi.fn().mockImplementation(() => ({
+    loadAddon: vi.fn(),
+    open: vi.fn(),
+    write: vi.fn(),
+    clear: vi.fn(),
+    dispose: vi.fn(),
+  })),
 }));
 
 describe('App Component', () => {

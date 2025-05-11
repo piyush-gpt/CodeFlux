@@ -39,6 +39,13 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.js'],
-    css: true,
+    css: {
+      modules: {
+        classNameStrategy: 'non-scoped'
+      }
+    },
+    deps: {
+      inline: [/tailwindcss/]
+    }
   },
 })
