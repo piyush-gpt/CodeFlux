@@ -1,0 +1,54 @@
+name: Deploy to GKE
+
+on:
+  workflow_run:
+    workflows: ["Build and Test"]
+    branches: [main]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+          
+      - name: Configure Docker
+        run: gcloud auth configure-docker
+        
+      - name: Get GKE Credentials
+        run: |
+          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} \
+            --zone ${{ secrets.GKE_ZONE }} \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+          
+      - name: Deploy Server
+        run: |
+          kubectl apply -f ProductionSetup/server.yaml
+          
+      - name: Deploy Pod Deployment Service
+        run: |
+          kubectl apply -f ProductionSetup/podDeployment.yml
+          
+      - name: Deploy Frontend
+        run: |
+          kubectl apply -f ProductionSetup/frontend.yaml
+          
+      - name: Deploy Ingress
+        run: |
+          kubectl apply -f ProductionSetup/ingress.yaml
+          
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/frontend
+          kubectl rollout status deployment/server
+          kubectl rollout status deployment/pod-deployment

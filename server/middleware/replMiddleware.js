@@ -2,8 +2,8 @@ const Repl = require('../models/Repl');
 
 const replAuth = async (req, res, next) => {
   try {
-    const { id } = req.params; // REPL ID from the URL
-    const userId = req.user.id; // Authenticated user ID from auth middleware
+    const { id } = req.params; 
+    const userId = req.user.id;
 
     const repl = await Repl.findById(id);
 

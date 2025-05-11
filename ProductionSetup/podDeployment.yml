@@ -1,0 +1,63 @@
+# poddeployment-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poddeployment
+  labels:
+    app: poddeployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: poddeployment
+  template:
+    metadata:
+      labels:
+        app: poddeployment
+    spec:
+      containers:
+      - name: poddeployment
+        image: your-registry/poddeployment:latest
+        ports:
+        - containerPort: 4001
+        env:
+        - name: REDIS_URL
+          value: "redis://redis:6379"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: poddeployment
+spec:
+  selector:
+    app: poddeployment
+  ports:
+  - port: 4001
+    targetPort: 4001
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: poddeployment-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: poddeployment
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70

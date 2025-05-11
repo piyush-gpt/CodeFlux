@@ -91,7 +91,7 @@ export default function initSocket (io) {
         if (!ptyProcess) {
           console.log(`Terminal session ${sessionId} not found, creating it`);
           ptyProcess = terminal.getTerminal(sessionId);
-
+          
           // Only register the data handler if it hasn't been already
           if (!dataHandlerRegistered) {
             ptyProcess.onData((data) => {
@@ -100,7 +100,7 @@ export default function initSocket (io) {
             dataHandlerRegistered = true;
           }
         }
-
+        
         // Append the incoming data to the buffer
         inputBuffer += data;
         console.log(`Received data: ${data}`);
@@ -141,7 +141,7 @@ export default function initSocket (io) {
           }
         } else {
           // Forward the character to the terminal for real-time display
-          terminal.writeToTerminal(sessionId, data);
+        terminal.writeToTerminal(sessionId, data);
         }
       } catch (error) {
         console.error('Error handling terminal input:', error);

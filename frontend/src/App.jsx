@@ -7,34 +7,37 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
 import ReplEditor from './components/ReplEditor';
+import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
 const App = () => (
-  <AuthProvider>
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/repl/:id/:lang" 
-          element={
-            <ProtectedRoute>
-              <ReplEditor />
-            </ProtectedRoute>
-          } 
-        />
-      </Routes>
-    </Router>
-  </AuthProvider>
+  <ErrorBoundary>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/repl/:id/:lang" 
+            element={
+              <ProtectedRoute>
+                <ReplEditor />
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
+  </ErrorBoundary>
 );
 
 export default App;

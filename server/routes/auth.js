@@ -4,6 +4,8 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const auth = require('../middleware/authMiddleware');
+const { authValidation } = require('../middleware/validation');
+const { logger } = require('../utils/logger');
 
 router.post('/signup', async (req, res) => {
   const { username, email, password } = req.body;
@@ -17,15 +19,15 @@ router.post('/signup', async (req, res) => {
   res.cookie('token', token, { httpOnly: true }).json({ success: true });
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', authValidation.login, async (req, res) => {
+  try {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user || !(await bcrypt.compare(password, user.password)))
     return res.json({ success: false, message: 'Invalid credentials' });
 
   const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET);
-  
-  // Send back user data along with the success response
+ 
   res.cookie('token', token, { httpOnly: true }).json({ 
     success: true,
     user: {
@@ -35,11 +37,18 @@ router.post('/login', async (req, res) => {
     },
     token // Optionally send token in response body if not using httpOnly cookie
   });
+  } catch (error) {
+    logger.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to login'
+    });
+  }
 });
 
 router.get('/me', auth, async (req, res) => {
   try {
-    // Since we have the user ID from the auth middleware
+
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
@@ -58,7 +67,19 @@ router.get('/me', auth, async (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
-  res.clearCookie('token').json({ success: true });
+  try {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    }).json({ success: true });
+  } catch (error) {
+    logger.error('Logout error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to logout' 
+    });
+  }
 });
 
 module.exports = router;

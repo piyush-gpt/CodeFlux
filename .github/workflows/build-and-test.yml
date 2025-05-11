@@ -1,0 +1,115 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'frontend/**'
+      - 'server/**'
+      - 'podDeployment/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'frontend/**'
+      - 'server/**'
+      - 'podDeployment/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+        
+      - name: Run Frontend Tests
+        working-directory: ./frontend
+        run: npm test
+        
+      - name: Install Server Dependencies
+        working-directory: ./server
+        run: npm ci
+        
+      - name: Run Server Tests
+        working-directory: ./server
+        run: npm test
+        
+      - name: Install PodDeployment Dependencies
+        working-directory: ./podDeployment
+        run: npm ci
+        
+      - name: Run PodDeployment Tests
+        working-directory: ./podDeployment
+        run: npm test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Generate Image Tags
+        id: tags
+        run: |
+          echo "SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/repl-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/repl-frontend:${{ env.SHA }}
+          
+      - name: Build and Push Server Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./server
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/repl-server:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/repl-server:${{ env.SHA }}
+          
+      - name: Build and Push PodDeployment Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./podDeployment
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/repl-pod-deployment:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/repl-pod-deployment:${{ env.SHA }}
+            
+      - name: Update Kubernetes Manifests
+        run: |
+          # Update image tags in all Kubernetes manifests
+          for file in ProductionSetup/*.y*ml; do
+            if [ -f "$file" ]; then
+              # Replace image tags with new version
+              sed -i "s|image: ${{ secrets.DOCKERHUB_USERNAME }}/repl-.*:.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/repl-\\1:${{ env.SHA }}|g" "$file"
+            fi
+          done
+          
+      - name: Commit Updated Manifests
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add ProductionSetup/*.y*ml
+          git commit -m "Update image tags to ${{ env.SHA }}" || exit 0
+          git push 

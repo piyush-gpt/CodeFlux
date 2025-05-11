@@ -5,9 +5,25 @@ import api from '../api';
 import axios from 'axios';
 import FileTreeExplorer from './FileTreeExplorer';
 import Terminal from './Terminal';
+import AIAssistant from './AIAssistant';
 import Editor from "@monaco-editor/react";
 import { debounce } from 'lodash';
 import io from 'socket.io-client';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Code, 
+  Terminal as TerminalIcon, 
+  Eye, 
+  Play, 
+  X,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Brain,
+  Save,
+  ExternalLink,
+  GripVertical
+} from 'lucide-react';
 
 function useSocket(ownerId, userId, replId, domain, username) {
   const [socket, setSocket] = useState(null);
@@ -124,65 +140,59 @@ const ReplEditor = () => {
     };
   }, [id, user?._id, lang, ownerId]);
 
-
-
   if (podCreating) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4">
+            <Loader2 className="h-12 w-12 text-blue-500" />
+          </div>
           <h2 className="text-xl font-semibold">Setting up your development environment...</h2>
-          <p className="text-gray-600 mt-2">This might take a few moments.</p>
-        </div>
+          <p className="text-gray-400 mt-2">This might take a few moments.</p>
+        </motion.div>
       </div>
     );
   }
 
   if (podError) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center p-6 bg-white rounded-lg shadow-md max-w-md">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-12 w-12 text-red-500 mx-auto mb-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
-          <h2 className="text-xl font-semibold text-red-600">Error Setting Up Environment</h2>
-          <p className="text-gray-700 mt-2">{podError}</p>
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center p-8 bg-gray-800 rounded-2xl shadow-xl max-w-md"
+        >
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-red-400">Error Setting Up Environment</h2>
+          <p className="text-gray-400 mt-2">{podError}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="mt-6 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center space-x-2 mx-auto"
           >
-            Try Again
+            <RefreshCw className="h-5 w-5" />
+            <span>Try Again</span>
           </button>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   if (!podCreated || !domain) {
-    console.log("Pod not created or domain not available");
-    console.log("Pod created:", podCreated);
-    console.log("Domain:", domain);
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500">
+          <Loader2 className="h-12 w-12 text-blue-500" />
+        </div>
       </div>
     );
   }
 
   return <ReplEditorContent domain={domain} ownerId={ownerId} repl={repl} />;
 };
-
 
 const ReplEditorContent = ({ domain, ownerId, repl }) => {
   const { id } = useParams();
@@ -193,12 +203,19 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
   const [unsavedFiles, setUnsavedFiles] = useState(new Set());
   const [showTerminal, setShowTerminal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showAI, setShowAI] = useState(false);
+  const [isEditorMounted, setIsEditorMounted] = useState(false);
   const [collaboratorCursors, setCollaboratorCursors] = useState({});
   const [previewAvailable, setPreviewAvailable] = useState(false);
   const { user } = useAuth();
   const socket = useSocket(ownerId, user._id, id, domain, user.username);
   const editorRef = useRef(null);
-
+  const [isDevServerRunning, setIsDevServerRunning] = useState(false);
+  const [debouncedSaveFunctions] = useState(new Map());
+  const [aiAssistantWidth, setAiAssistantWidth] = useState(450);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartX = useRef(0);
+  const dragStartWidth = useRef(0);
 
   useEffect(() => {
     if (!socket) return;
@@ -280,50 +297,49 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
   }, [collaboratorCursors]);
 
   const handleEditorDidMount = (editor) => {
-    editorRef.current = editor; // Store the editor instance
+    console.log('Editor mounted');
+    editorRef.current = editor;
+    setIsEditorMounted(true);
     editor.onDidChangeCursorPosition((event) => {
-      const position = event.position; // Get the new cursor position
-      handleCursorMove(position); // Call your cursor move handler
+      const position = event.position;
+      handleCursorMove(position);
     });
   };
 
-
-  const debouncedSaveToS3 = useMemo(() => {
-    if (!socket) return () => { }; // no-op if no socket
-    console.log("Creating debounced save function");
-    return debounce(async (filePath, content) => {
-      try {
-        console.log(`Saving file: ${filePath}`);
-        socket.emit("saveFile", { filePath, content }, (response) => {
-          if (response.success) {
-            console.log(`File saved: ${filePath}`);
-            setUnsavedFiles(prev => {
-              const newSet = new Set(prev);
-              newSet.delete(filePath);
-              return newSet;
-            });
-          } else {
-            console.error('Error saving file:', response.error);
-          }
-        });
-      } catch (error) {
-        console.error('Error saving file:', error);
-      }
-    }, 2000);
-  }, [socket]);
+  const getDebouncedSaveFunction = (filePath) => {
+    if (!debouncedSaveFunctions.has(filePath)) {
+      const debouncedFn = debounce(async (content) => {
+        try {
+          console.log(`Saving file: ${filePath}`);
+          socket.emit("saveFile", { filePath, content }, (response) => {
+            if (response.success) {
+              console.log(`File saved: ${filePath}`);
+              setUnsavedFiles(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(filePath);
+                return newSet;
+              });
+            } else {
+              console.error('Error saving file:', response.error);
+            }
+          });
+        } catch (error) {
+          console.error('Error saving file:', error);
+        }
+      }, 2000);
+      debouncedSaveFunctions.set(filePath, debouncedFn);
+    }
+    return debouncedSaveFunctions.get(filePath);
+  };
 
   const handleCursorMove = (position) => {
-    console.log("Cursor moved:", position);
     if (!currentFile) return;
-    console.log("Current file is available");
     // Emit cursor position to other users
     socket.emit('cursor:move', { filePath: currentFile.path, position });
-    console.log("Emitting cursor move event");
   };
 
   const checkPreviewAvailability = async () => {
     try {
-      // Use the dynamic domain for preview
       const response = await fetch(`http://${domain}/`, {
         method: 'HEAD',
         mode: 'no-cors'
@@ -333,7 +349,6 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
       setPreviewAvailable(false);
     }
   };
-
 
   const handleFileSelect = async (file) => {
     if (file.type === 'file') {
@@ -366,21 +381,21 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
     // Update file content in state
     setFileContent(value);
 
-    console.log("File content updated:");
     // Update cache
     setFileCache(prev => ({
       ...prev,
       [currentFile.path]: value
     }));
 
-    console.log("Emitting file edit event");
+    // Emit file edit event
     socket.emit('file:edit', { filePath: currentFile.path, content: value });
+    
     // Mark file as unsaved
     setUnsavedFiles(prev => new Set(prev).add(currentFile.path));
 
-    console.log("Unsaved files:");
     // Trigger debounced save
-    debouncedSaveToS3(currentFile.path, value);
+    const debouncedSave = getDebouncedSaveFunction(currentFile.path);
+    debouncedSave(value);
   };
 
   const toggleTerminal = () => {
@@ -392,9 +407,9 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
       return newShowTerminal;
     });
   };
+
   const togglePreview = () => {
     checkPreviewAvailability();
-
     setShowPreview(prev => {
       const newShowPreview = !prev;
       if (showTerminal && !newShowPreview) {
@@ -404,141 +419,339 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
     });
   };
 
+  const handleRun = () => {
+    if (repl.language === 'reactjs') {
+      if (!isDevServerRunning) {
+        socket.emit('terminal:input', 'npm install\r');
+        
+        setTimeout(() => {
+          socket.emit('terminal:input', 'npm run dev\r');
+          setIsDevServerRunning(true);
+          
+          setTimeout(() => {
+            setShowPreview(true);
+            setShowTerminal(false);
+          }, 3000);
+        }, 10000); 
+      } else {
+        setShowPreview(true);
+        setShowTerminal(false);
+      }
+    } else if (currentFile && currentFile.name.endsWith('.cpp')) {
+      // Existing C++ handling
+      const filePath = currentFile.path.replace(/^workspace\//, '');
+      const compileCommand = `g++ "${filePath}"\r`;
+      socket.emit('terminal:input', compileCommand);
+    } else if (currentFile && currentFile.name.endsWith('.py')) {
+      // Python file handling
+      const filePath = currentFile.path.replace(/^workspace\//, '');
+      // Use absolute path to ensure it works regardless of current terminal directory
+      const runCommand = `python "/workspace/${filePath}"\r`;
+      socket.emit('terminal:input', runCommand);
+    }
+  };
+
+  const handleDragStart = (e) => {
+    setIsDragging(true);
+    dragStartX.current = e.clientX;
+    dragStartWidth.current = aiAssistantWidth;
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+  };
+
+  const handleDragMove = (e) => {
+    if (!isDragging) return;
+    const deltaX = dragStartX.current - e.clientX;
+    const newWidth = Math.min(Math.max(dragStartWidth.current + deltaX, 200), 800);
+    setAiAssistantWidth(newWidth);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleDragMove);
+      window.addEventListener('mouseup', handleDragEnd);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleDragMove);
+      window.removeEventListener('mouseup', handleDragEnd);
+    };
+  }, [isDragging]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="text-gray-300 hover:text-white"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button>
-              <h1 className="text-xl font-semibold text-white">
-                {repl?.name}
-                {unsavedFiles.size > 0 && (
-                  <span className="ml-2 text-sm text-yellow-400">
-                    ({unsavedFiles.size} unsaved {unsavedFiles.size === 1 ? 'change' : 'changes'})
-                  </span>
-                )}
-              </h1>
-              <span className="text-sm px-2 py-1 bg-gray-700 rounded">
-                {repl?.language}
+      <header className="bg-gray-800 border-b border-gray-700 p-4 relative z-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+          <button
+              onClick={() => navigate(-1)}
+              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+              title="Go back"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <Code className="h-6 w-6 text-blue-500" />
+            <h1 className="text-xl font-semibold">{repl?.name || 'Untitled Project'}</h1>
+            {unsavedFiles.size > 0 && (
+              <span className="text-sm text-yellow-400 flex items-center gap-1">
+                <Save size={14} />
+                {unsavedFiles.size} unsaved {unsavedFiles.size === 1 ? 'file' : 'files'}
               </span>
-              {domain && (
-                <span className="text-sm px-2 py-1 bg-green-700 rounded">
-                  {domain}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={toggleTerminal}
-                className={`px-3 py-2 ${showTerminal ? 'bg-gray-600' : 'bg-gray-700'} text-white rounded-md hover:bg-gray-600 transition-colors flex items-center`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-                </svg>
-                Terminal
-              </button>
+            )}
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowAI(!showAI)}
+              className={`p-2 rounded-lg transition-colors ${
+                showAI ? 'bg-purple-500 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'
+              }`}
+            >
+              <Brain className="h-5 w-5" />
+            </button>
+            <button
+              onClick={toggleTerminal}
+              className={`p-2 rounded-lg transition-colors ${
+                showTerminal ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'
+              }`}
+            >
+              <TerminalIcon className="h-5 w-5" />
+            </button>
+            
               <button
                 onClick={togglePreview}
-                className={`px-3 py-2 ${showPreview ? 'bg-gray-600' : 'bg-gray-700'} text-white rounded-md hover:bg-gray-600 transition-colors flex items-center`}
+                className={`p-2 rounded-lg transition-colors ${
+                  showPreview ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                }`}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm11 1H6v8l4-2 4 2V6z" clipRule="evenodd" />
-                </svg>
-                Preview
+                <Eye className="h-5 w-5" />
               </button>
-              <button
-                onClick={() => {
-                  if (currentFile && currentFile.name.endsWith('.cpp')) {
-                    // Remove workspace/ prefix if it exists
-                    const filePath = currentFile.path.replace(/^workspace\//, '');
-                    // Just send the file path to the worker
-                    const compileCommand = `g++ "${filePath}"\r`;
-                    socket.emit('terminal:input', compileCommand);
-                  }
-                }}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Run
-              </button>
-            </div>
+          
+            <button
+              onClick={handleRun}
+              className="p-2 rounded-lg bg-green-500 hover:bg-green-600 text-white transition-colors"
+            >
+              <Play className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Main Editor Area */}
+      {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
-        <FileTreeExplorer onFileSelect={handleFileSelect} socket={socket} />
-        <div className="flex-1 flex flex-col">
-          <div className={`flex-1 ${showTerminal || showPreview ? 'h-1/2' : 'h-full'}`}>
-            {currentFile ? (
-              <Editor
-                height="100%"
-                defaultLanguage={currentFile.name.split('.').pop()}
-                theme="vs-dark"
-                value={fileContent}
-                onChange={handleEditorChange}
-                onMount={handleEditorDidMount}
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 14,
-                  wordWrap: 'on',
-                  automaticLayout: true,
-                }}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-400">
-                Select a file to edit
-              </div>
-            )}
+        {/* File Tree */}
+        <motion.div
+          initial={{ width: 0, opacity: 0 }}
+          animate={{ width: 250, opacity: 1 }}
+          className="bg-gray-800 border-r border-gray-700"
+        >
+          <FileTreeExplorer onFileSelect={handleFileSelect} socket={socket} />
+        </motion.div>
+
+        {/* Editor and AI Assistant */}
+        <div className="flex-1 flex relative">
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 relative">
+              <AnimatePresence mode="wait">
+                {currentFile ? (
+                  <motion.div
+                    key={currentFile.path}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0"
+                  >
+                    <Editor
+                      height="100%"
+                      value={fileContent}
+                      onChange={handleEditorChange}
+                      onMount={handleEditorDidMount}
+                      theme="vs-dark"
+                      options={{
+                        minimap: { enabled: false },
+                        fontSize: 14,
+                        wordWrap: 'on',
+                        lineNumbers: 'on',
+                        renderWhitespace: 'selection',
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        cursorStyle: 'line',
+                        cursorBlinking: 'smooth',
+                        cursorSmoothCaretAnimation: 'on',
+                        cursorWidth: 2,
+                        renderLineHighlight: 'all',
+                        selectionHighlight: true,
+                        highlightActiveIndentGuide: true,
+                        bracketPairColorization: {
+                          enabled: true
+                        },
+                        guides: {
+                          bracketPairs: true,
+                          indentation: true,
+                          highlightActiveBracketPair: true
+                        },
+                        semanticHighlighting: {
+                          enabled: true
+                        },
+                        suggest: {
+                          showWords: true,
+                          showSnippets: true,
+                          showClasses: true,
+                          showFunctions: true,
+                          showVariables: true,
+                          showProperties: true,
+                          showWords: true,
+                          showColors: true,
+                          showFiles: true,
+                          showFolders: true,
+                          showTypeParameters: true,
+                          showEnums: true,
+                          showEnumsMembers: true,
+                          showConstructors: true,
+                          showDeprecated: true,
+                          showFields: true,
+                          showFiles: true,
+                          showFolders: true,
+                          showFunctions: true,
+                          showInterfaces: true,
+                          showIssues: true,
+                          showKeywords: true,
+                          showMethods: true,
+                          showModules: true,
+                          showOperators: true,
+                          showProperties: true,
+                          showReferences: true,
+                          showSnippets: true,
+                          showStructs: true,
+                          showTypeParameters: true,
+                          showUnits: true,
+                          showValues: true,
+                          showVariables: true,
+                          showWords: true,
+                          showColors: true,
+                          showFiles: true,
+                          showFolders: true,
+                          showTypeParameters: true,
+                          showEnums: true,
+                          showEnumsMembers: true,
+                          showConstructors: true,
+                          showDeprecated: true,
+                          showFields: true,
+                          showFiles: true,
+                          showFolders: true,
+                          showFunctions: true,
+                          showInterfaces: true,
+                          showIssues: true,
+                          showKeywords: true,
+                          showMethods: true,
+                          showModules: true,
+                          showOperators: true,
+                          showProperties: true,
+                          showReferences: true,
+                          showSnippets: true,
+                          showStructs: true,
+                          showTypeParameters: true,
+                          showUnits: true,
+                          showValues: true,
+                          showVariables: true
+                        }
+                      }}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 flex items-center justify-center text-gray-400"
+                  >
+                    <div className="text-center">
+                      <Code className="h-12 w-12 mx-auto mb-4 text-gray-600" />
+                      <p>Select a file to start editing</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Terminal */}
+            <AnimatePresence>
+              {showTerminal && (
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: 300 }}
+                  exit={{ height: 0 }}
+                  className="border-t border-gray-700"
+                >
+                  <Terminal socket={socket} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Preview */}
+            <AnimatePresence>
+              {showPreview && previewAvailable && (
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: 300 }}
+                  exit={{ height: 0 }}
+                  className="border-t border-gray-700 relative"
+                >
+                  <div className="absolute top-2 right-2 z-10">
+                    <a
+                      href={`http://${domain}/preview`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Open in new tab
+                    </a>
+                  </div>
+                  <iframe
+                    src={`http://${domain}/preview`}
+                    className="w-full h-full"
+                    title="Preview"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* Terminal Panel */}
-          {showTerminal && (
-            <div className="h-1/2 border-t border-gray-700">
-              <Terminal socket={socket} />
-            </div>
-          )}
-
-          {/* Preview Panel */}
-          {showPreview && (
-            <div className="h-1/2 border-t border-gray-700 bg-white  ">
-              {previewAvailable ? (
-                <iframe
-                  src={`http://${domain}/`}
-                  className="w-full h-full border-none"
-                  title="Preview"
-                  sandbox="allow-forms allow-modals allow-pointer-lock allow-popups allow-same-origin allow-scripts"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full bg-gray-800 text-gray-400">
-                  <div className="text-center p-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <p className="text-lg font-semibold">Nothing to Preview</p>
-                    <p className="max-w-md mt-2">
-                      There's no website running at port 5173 in your worker container.
-                      Launch a web server on port 5173 to see a preview here.
-                    </p>
-                  </div>
+          {/* AI Assistant */}
+          <AnimatePresence>
+            {showAI && (
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: aiAssistantWidth, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                className="absolute right-0 top-0 bottom-0 bg-gray-800 border-l border-gray-700 shadow-xl"
+                style={{ zIndex: 5 }}
+              >
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-blue-500 transition-colors"
+                  onMouseDown={handleDragStart}
+                >
+                  <GripVertical className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 </div>
-              )}
-            </div>
-          )}
+                {isEditorMounted && (
+                  <AIAssistant
+                    currentFile={currentFile}
+                    fileContent={fileContent}
+                    onApplyChanges={handleEditorChange}
+                    editorRef={editorRef}
+                  />
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
