@@ -23,12 +23,17 @@ spec:
         env:
         - name: REDIS_URL
           value: "redis://redis:6379"
+        envFrom:
+        - secretRef:
+            name: codeflux-secrets
+        - configMapRef:
+            name: codeflux-config
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "250m"
-          limits:
             memory: "256Mi"
+            cpu: "300m"
+          limits:
+            memory: "512Mi"
             cpu: "500m"
 ---
 apiVersion: v1

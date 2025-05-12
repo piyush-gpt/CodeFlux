@@ -4,12 +4,12 @@ import { KubeConfig, CoreV1Api, NetworkingV1Api } from '@kubernetes/client-node'
 import os from 'os';
 
 const redis = new Redis({
-  host: '127.0.0.1',  // Redis host (localhost)
+  host: process.env.REDIS_HOST,  // Redis host (localhost)
   port: 6379,          // Redis port
 });
 
 const redisSub = new Redis({
-  host: '127.0.0.1',  // Redis host (localhost)
+  host: process.env.REDIS_HOST,  // Redis host (localhost)
   port: 6379,          // Redis port
 });
 

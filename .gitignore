@@ -52,3 +52,12 @@ worker-cpp/
 worker-python/
 worker/
 runner/
+
+codefluxConfigMap.yaml
+codefluxSecrets.yaml
+
+docker/
+
+push-docker-images.sh
+
+
