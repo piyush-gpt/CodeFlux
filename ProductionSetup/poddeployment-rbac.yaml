@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: poddeployment-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: poddeployment-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services"]
+  verbs: ["create", "get", "list", "watch", "delete"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["create", "get", "list", "watch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: poddeployment-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: poddeployment-sa
+  namespace: default
+roleRef:
+  kind: Role
+  name: poddeployment-role
+  apiGroup: rbac.authorization.k8s.io

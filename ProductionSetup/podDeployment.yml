@@ -15,9 +15,10 @@ spec:
       labels:
         app: poddeployment
     spec:
+      serviceAccountName: poddeployment-sa
       containers:
       - name: poddeployment
-        image: your-registry/poddeployment:latest
+        image: piyushgpt/repl-pod-deployment:latest
         ports:
         - containerPort: 4001
         env:
