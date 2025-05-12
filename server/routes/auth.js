@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const auth = require('../middleware/authMiddleware');
-const { authValidation } = require('../middleware/validation');
 const { logger } = require('../utils/logger');
 
 router.post('/signup', async (req, res) => {
@@ -19,24 +18,24 @@ router.post('/signup', async (req, res) => {
   res.cookie('token', token, { httpOnly: true }).json({ success: true });
 });
 
-router.post('/login', authValidation.login, async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
-  if (!user || !(await bcrypt.compare(password, user.password)))
-    return res.json({ success: false, message: 'Invalid credentials' });
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user || !(await bcrypt.compare(password, user.password)))
+      return res.json({ success: false, message: 'Invalid credentials' });
 
-  const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET);
- 
-  res.cookie('token', token, { httpOnly: true }).json({ 
-    success: true,
-    user: {
-      _id: user._id,
-      username: user.username,
-      email: user.email
-    },
-    token // Optionally send token in response body if not using httpOnly cookie
-  });
+    const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET);
+   
+    res.cookie('token', token, { httpOnly: true }).json({ 
+      success: true,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email
+      },
+      token // Optionally send token in response body if not using httpOnly cookie
+    });
   } catch (error) {
     logger.error('Login error:', error);
     res.status(500).json({

@@ -25,7 +25,7 @@ const Dashboard = () => {
   const [repls, setRepls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newRepl, setNewRepl] = useState({ name: '', language: 'javascript', description: '' });
+  const [newRepl, setNewRepl] = useState({ name: '', language: 'python', description: '' });
   const { user, logout } = useAuth();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');

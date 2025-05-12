@@ -5,7 +5,6 @@ const auth = require('../middleware/authMiddleware');
 const User = require('../models/User');
 const Collaboration = require('../models/Collaboration');
 const { copyS3Folder, deleteFromS3 } = require('../s3');
-const { replValidation, commonRules } = require('../middleware/validation');
 const { logger } = require('../utils/logger');
 
 // Get all REPLs for the user
@@ -38,7 +37,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // Create a new REPL
-router.post('/', auth, replValidation.create, async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const { name, language, description } = req.body;
     
@@ -138,7 +137,7 @@ router.post('/:id/add-collaborator', auth, async (req, res) => {
   }
 });
 
-router.delete('/:id', auth, commonRules.id, replValidation.delete, async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const repl = await Repl.findOne({ _id: req.params.id, creator: req.user.id });
 
@@ -158,7 +157,7 @@ router.delete('/:id', auth, commonRules.id, replValidation.delete, async (req, r
     }
 
     // Delete the REPL
-    await repl.remove();
+    await repl.deleteOne();
 
     res.json({ success: true, message: 'REPL deleted successfully' });
   } catch (error) {

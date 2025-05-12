@@ -1,7 +1,6 @@
-
 import Redis from 'ioredis';
 import { KubeConfig, CoreV1Api, NetworkingV1Api } from '@kubernetes/client-node';
-import os from 'os';
+
 
 const redis = new Redis({
   host: process.env.REDIS_HOST,  // Redis host (localhost)
@@ -19,17 +18,6 @@ kc.loadFromDefault();
 const coreV1Api = kc.makeApiClient(CoreV1Api);
 const networkingV1Api = kc.makeApiClient(NetworkingV1Api);
 
-function getLocalIPAddress() {
-  const interfaces = os.networkInterfaces();
-  for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name]) {
-      if (iface.family === 'IPv4' && !iface.internal) {
-        return iface.address;
-      }
-    }
-  }
-  return '127.0.0.1';
-}
 
 function getReplRedisKey(userId, replId) {
   return `repl:delete:${userId}:${replId}`;
@@ -101,8 +89,7 @@ export async function deployRepl(userId, replId, language) {
   const podName = `repl-${namePrefix}`;
   const serviceName = `svc-${namePrefix}`;
   const ingressName = `ing-${namePrefix}`;
-  const serverIP = getLocalIPAddress();
-  const runnerDomain = `${namePrefix}.${serverIP}.nip.io`;
+  const runnerDomain = `${namePrefix}.127.0.0.1.nip.io`;
 
   let workerImage = 'piyushgpt/repl-worker';
   if (language.toLowerCase() === 'react' || language.toLowerCase() === 'reactjs') {
@@ -156,8 +143,8 @@ export async function deployRepl(userId, replId, language) {
             aws s3 cp s3://replit/code/${userId}/${replId}/ /workspace/ --recursive --endpoint-url https://4ea86ca138a9f14ac92232c42ba24b37.r2.cloudflarestorage.com
           `],
           env: [
-            { name: 'AWS_ACCESS_KEY_ID', valueFrom: { secretKeyRef: { name: 'r2-secret', key: 'access_key' } } },
-            { name: 'AWS_SECRET_ACCESS_KEY', valueFrom: { secretKeyRef: { name: 'r2-secret', key: 'secret_key' } } },
+            { name: 'AWS_ACCESS_KEY_ID', valueFrom: { secretKeyRef: { name: 'codeflux-secrets', key: 'AWS_ACCESS_KEY_ID' } } },
+            { name: 'AWS_SECRET_ACCESS_KEY', valueFrom: { secretKeyRef: { name: 'codeflux-secrets', key: 'AWS_SECRET_ACCESS_KEY' } } },
           ],
           volumeMounts: [{ name: 'workspace-volume', mountPath: '/workspace' }],
         },
@@ -189,12 +176,12 @@ export async function deployRepl(userId, replId, language) {
         'nginx.ingress.kubernetes.io/proxy-read-timeout': '3600',
         'nginx.ingress.kubernetes.io/proxy-send-timeout': '3600',
         'nginx.ingress.kubernetes.io/proxy-connect-timeout': '3600',
-        'nginx.ingress.kubernetes.io/websocket-services': serviceName,
+        'nginx.ingress.kubernetes.io/websocket-services': 'true',
         'nginx.ingress.kubernetes.io/enable-websocket': 'true',
         'nginx.ingress.kubernetes.io/enable-cors': 'true',
         'nginx.ingress.kubernetes.io/cors-allow-origin': '*',
         'nginx.ingress.kubernetes.io/cors-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'nginx.ingress.kubernetes.io/cors-allow-headers': '*',
+        'nginx.ingress.kubernetes.io/cors-allow-headers': '*'
       },
     },
     spec: {

@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const { GoogleGenAI } = require('@google/genai');
-const { aiValidation } = require('../middleware/validation');
 const { logger } = require('../utils/logger');
 
 if (!process.env.GEMINI_API_KEY) {
@@ -29,7 +28,7 @@ Please provide a helpful response. If you suggest code changes, wrap them in \`\
 If you're explaining code, be clear and concise. If you're fixing bugs, explain what was wrong and how you fixed it.`;
 };
 
-router.post('/assist', aiValidation.assist, async (req, res) => {
+router.post('/assist', async (req, res) => {
   try {
     const { prompt, fileContent, filePath, language } = req.body;
     
@@ -60,7 +59,7 @@ router.post('/assist', aiValidation.assist, async (req, res) => {
   }
 });
 
-router.post('/complete', aiValidation.complete, async (req, res) => {
+router.post('/complete', async (req, res) => {
   try {
     const { fileContent, filePath, language, cursorPosition, prompt } = req.body;
     
@@ -110,7 +109,7 @@ CRITICAL INSTRUCTIONS:
   }
 });
 
-router.post('/explain', aiValidation.explain, async (req, res) => {
+router.post('/explain', async (req, res) => {
   try {
     const { fileContent, filePath, language, selectedCode } = req.body;
     

@@ -15,7 +15,7 @@
     "@aws-sdk/lib-storage": "^3.787.0",
     "@google/genai": "^0.13.0",
     "aws-sdk": "^2.1692.0",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "compression": "^1.8.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

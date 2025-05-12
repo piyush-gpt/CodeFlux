@@ -37,6 +37,8 @@ const Signup = () => {
     }
 
     try {
+      console.log("signup");
+      console.log(import.meta.env.VITE_API_URL);  
       const res = await api.post('/api/auth/signup', {
         username: formData.username,
         email: formData.email,

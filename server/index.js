@@ -30,7 +30,7 @@ app.use(compression());
 app.use(morgan('combined'));
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: process.env.FRONTEND_URL ,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -63,5 +63,7 @@ app.use((err, req, res, next) => {
   });
 });
 
+
 const PORT =  3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+

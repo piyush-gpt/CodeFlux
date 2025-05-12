@@ -109,7 +109,7 @@ const ReplEditor = () => {
       try {
         setPodCreating(true);
         console.log("Creating pod...12");
-        const response = await axios.post(`http://localhost:4001/api/deploy`, {
+        const response = await axios.post(`${import.meta.env.VITE_POD_DEPLOYMENT_URL}/api/deploy`, {
           userId: ownerId, // Use the owner's ID here
           replId: id,
           language: lang,
@@ -570,99 +570,58 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
                   >
               <Editor
                 height="100%"
+                defaultLanguage={repl.language}
                 value={fileContent}
                 onChange={handleEditorChange}
                 onMount={handleEditorDidMount}
-                      theme="vs-dark"
+                theme="vs-dark"
                 options={{
                   minimap: { enabled: false },
                   fontSize: 14,
                   wordWrap: 'on',
-                        lineNumbers: 'on',
-                        renderWhitespace: 'selection',
-                        scrollBeyondLastLine: false,
                   automaticLayout: true,
-                        cursorStyle: 'line',
-                        cursorBlinking: 'smooth',
-                        cursorSmoothCaretAnimation: 'on',
-                        cursorWidth: 2,
-                        renderLineHighlight: 'all',
-                        selectionHighlight: true,
-                        highlightActiveIndentGuide: true,
-                        bracketPairColorization: {
-                          enabled: true
-                        },
-                        guides: {
-                          bracketPairs: true,
-                          indentation: true,
-                          highlightActiveBracketPair: true
-                        },
-                        semanticHighlighting: {
-                          enabled: true
-                        },
-                        suggest: {
-                          showWords: true,
-                          showSnippets: true,
-                          showClasses: true,
-                          showFunctions: true,
-                          showVariables: true,
-                          showProperties: true,
-                          showWords: true,
-                          showColors: true,
-                          showFiles: true,
-                          showFolders: true,
-                          showTypeParameters: true,
-                          showEnums: true,
-                          showEnumsMembers: true,
-                          showConstructors: true,
-                          showDeprecated: true,
-                          showFields: true,
-                          showFiles: true,
-                          showFolders: true,
-                          showFunctions: true,
-                          showInterfaces: true,
-                          showIssues: true,
-                          showKeywords: true,
-                          showMethods: true,
-                          showModules: true,
-                          showOperators: true,
-                          showProperties: true,
-                          showReferences: true,
-                          showSnippets: true,
-                          showStructs: true,
-                          showTypeParameters: true,
-                          showUnits: true,
-                          showValues: true,
-                          showVariables: true,
-                          showWords: true,
-                          showColors: true,
-                          showFiles: true,
-                          showFolders: true,
-                          showTypeParameters: true,
-                          showEnums: true,
-                          showEnumsMembers: true,
-                          showConstructors: true,
-                          showDeprecated: true,
-                          showFields: true,
-                          showFiles: true,
-                          showFolders: true,
-                          showFunctions: true,
-                          showInterfaces: true,
-                          showIssues: true,
-                          showKeywords: true,
-                          showMethods: true,
-                          showModules: true,
-                          showOperators: true,
-                          showProperties: true,
-                          showReferences: true,
-                          showSnippets: true,
-                          showStructs: true,
-                          showTypeParameters: true,
-                          showUnits: true,
-                          showValues: true,
-                          showVariables: true
-                        }
-                      }}
+                  scrollBeyondLastLine: false,
+                  backgroundColor: '#1F2937',
+                  colors: {
+                    'editor.background': '#1F2937',
+                    'editor.foreground': '#E5E7EB',
+                    'editor.lineHighlightBackground': '#374151',
+                    'editor.selectionBackground': '#4B5563',
+                    'editor.inactiveSelectionBackground': '#374151',
+                    'editorCursor.foreground': '#E5E7EB',
+                    'editorWhitespace.foreground': '#4B5563',
+                    'editorIndentGuide.background': '#374151',
+                    'editorIndentGuide.activeBackground': '#4B5563',
+                    'editorLineNumber.foreground': '#6B7280',
+                    'editorLineNumber.activeForeground': '#E5E7EB',
+                  },
+                  suggest: {
+                    showWords: true,
+                    showColors: true,
+                    showFiles: true,
+                    showFolders: true,
+                    showTypeParameters: true,
+                    showEnums: true,
+                    showEnumsMembers: true,
+                    showConstructors: true,
+                    showDeprecated: true,
+                    showFields: true,
+                    showFunctions: true,
+                    showInterfaces: true,
+                    showIssues: true,
+                    showKeywords: true,
+                    showMethods: true,
+                    showModules: true,
+                    showOperators: true,
+                    showProperties: true,
+                    showReferences: true,
+                    showSnippets: true,
+                    showStructs: true,
+                    showUnits: true,
+                    showValues: true,
+                    showVariables: true
+                  }
+                }}
               />
                   </motion.div>
             ) : (
@@ -702,14 +661,14 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
                   initial={{ height: 0 }}
                   animate={{ height: 300 }}
                   exit={{ height: 0 }}
-                  className="border-t border-gray-700 relative"
+                  className="border-t bg-white relative"
                 >
                   <div className="absolute top-2 right-2 z-10">
                     <a
                       href={`http://${domain}/preview`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                      className="p-2 bg-gray-700  text-black hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-2 text-sm"
                     >
                       <ExternalLink className="h-4 w-4" />
                       Open in new tab

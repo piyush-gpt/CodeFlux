@@ -86,7 +86,7 @@ const AIAssistant = ({ currentFile, fileContent, onApplyChanges, editorRef }) =>
 
   const streamResponse = async (endpoint, data) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/ai/${endpoint}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ const AIAssistant = ({ currentFile, fileContent, onApplyChanges, editorRef }) =>
     console.log('Completing code at position:', position);
     
     try {
-      const response = await fetch(`http://localhost:3000/api/ai/complete`, {
+      const response = await fetch(`/api/ai/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +220,7 @@ const AIAssistant = ({ currentFile, fileContent, onApplyChanges, editorRef }) =>
         
         // Skip the first line if it contains a language identifier
         const firstLine = lines[0].trim().toLowerCase();
-        const languageIdentifiers = ['python', 'javascript', 'jsx', 'css', 'html', 'typescript', 'tsx', 'js'];
+        const languageIdentifiers = ['python', 'py','javascript', 'jsx', 'css', 'html', 'typescript', 'tsx', 'js', 'cpp', 'c++'];
         const shouldSkipFirstLine = languageIdentifiers.some(lang => firstLine === lang);
         
         // Join the lines back together, skipping the first line if needed

@@ -1,9 +1,9 @@
-import {
+const {
   S3Client,
   ListObjectsV2Command,
   CopyObjectCommand,
   DeleteObjectsCommand,
-} from "@aws-sdk/client-s3";
+} = require("@aws-sdk/client-s3");
 const s3 = new S3Client({
   region: "auto",
   endpoint:  process.env.R2_ENDPOINT,
@@ -13,9 +13,7 @@ const s3 = new S3Client({
   },
 });
 
-
-
-export async function copyS3Folder(sourcePrefix, destinationPrefix) {
+async function copyS3Folder(sourcePrefix, destinationPrefix) {
   const bucket = process.env.AWS_BUCKET_NAME;
 
   let continuationToken = undefined;
@@ -72,9 +70,7 @@ export async function copyS3Folder(sourcePrefix, destinationPrefix) {
   }
 }
 
-
-
-export async function directoryExists(prefix) {
+async function directoryExists(prefix) {
   const bucket = process.env.AWS_BUCKET_NAME;
 
   try {
@@ -93,7 +89,7 @@ export async function directoryExists(prefix) {
   }
 }
 
-export async function deleteFromS3(userId, replId, targetPath) {
+async function deleteFromS3(userId, replId, targetPath) {
   const bucket = process.env.AWS_BUCKET_NAME;
   const s3KeyPrefix = `code/${userId}/${replId}/`;
 
@@ -129,3 +125,9 @@ export async function deleteFromS3(userId, replId, targetPath) {
     return { success: false, error: error.message };
   }
 }
+
+module.exports = {
+  copyS3Folder,
+  directoryExists,
+  deleteFromS3
+};

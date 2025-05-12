@@ -28,7 +28,7 @@ class ErrorBoundary extends React.Component {
             <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
             <div className="bg-gray-800 p-4 rounded-lg mb-4">
               <p className="text-red-400 mb-2">{this.state.error?.toString()}</p>
-              {process.env.NODE_ENV === 'development' && (
+              {import.meta.env.VITE_NODE_ENV === 'development' && (
                 <pre className="text-sm text-gray-400 overflow-auto">
                   {this.state.errorInfo?.componentStack}
                 </pre>
