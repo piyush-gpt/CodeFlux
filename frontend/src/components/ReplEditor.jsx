@@ -378,7 +378,6 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
   const handleEditorChange = (value) => {
     if (!currentFile) return;
 
-    // Update file content in state
     setFileContent(value);
 
     // Update cache
