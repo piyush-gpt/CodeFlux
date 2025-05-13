@@ -214,7 +214,6 @@ const AIAssistant = ({ currentFile, fileContent, onApplyChanges, editorRef }) =>
     if (aiResponse.includes('```')) {
       const codeMatch = aiResponse.match(/```[\s\S]*?```/);
       if (codeMatch) {
-        // Get the code content and split into lines
         const code = codeMatch[0].replace(/```/g, '').trim();
         const lines = code.split('\n');
         
