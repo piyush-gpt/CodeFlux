@@ -6,7 +6,7 @@ metadata:
   labels:
     app: server
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: server
@@ -30,11 +30,11 @@ spec:
             name: codeflux-config
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "300m"
+            memory: "128Mi"
+            cpu: "100m"
           limits:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: "256Mi"
+            cpu: "200m"
 ---
 apiVersion: v1
 kind: Service
@@ -57,7 +57,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: server
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 10
   metrics:
   - type: Resource
