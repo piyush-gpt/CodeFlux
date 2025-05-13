@@ -11,7 +11,6 @@ const replAuth = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'REPL not found' });
     }
 
-    // Check if the user is the owner or a collaborator
     if (repl.creator.toString() !== userId && !repl.collaborators.includes(userId)) {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
