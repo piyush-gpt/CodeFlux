@@ -217,7 +217,6 @@ const AIAssistant = ({ currentFile, fileContent, onApplyChanges, editorRef }) =>
         const code = codeMatch[0].replace(/```/g, '').trim();
         const lines = code.split('\n');
         
-        // Skip the first line if it contains a language identifier
         const firstLine = lines[0].trim().toLowerCase();
         const languageIdentifiers = ['python', 'py','javascript', 'jsx', 'css', 'html', 'typescript', 'tsx', 'js', 'cpp', 'c++'];
         const shouldSkipFirstLine = languageIdentifiers.some(lang => firstLine === lang);
