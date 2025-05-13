@@ -34,7 +34,7 @@ router.post('/login', async (req, res) => {
         username: user.username,
         email: user.email
       },
-      token // Optionally send token in response body if not using httpOnly cookie
+      token
     });
   } catch (error) {
     logger.error('Login error:', error);
