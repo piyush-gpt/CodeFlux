@@ -6,6 +6,11 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
 spec:
   tls:
   - hosts:
@@ -13,7 +18,7 @@ spec:
     - "www.codefluxcloud.in"
     - "api.codefluxcloud.in"
     - "poddeployment.codefluxcloud.in"
-    secretName: codeflux-tls
+    secretName: codefluxcloud-in-tls
   rules:
   - host: codefluxcloud.in
     http:
