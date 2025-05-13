@@ -386,7 +386,6 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
       [currentFile.path]: value
     }));
 
-    // Emit file edit event
     socket.emit('file:edit', { filePath: currentFile.path, content: value });
     
     // Mark file as unsaved
