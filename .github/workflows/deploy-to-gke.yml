@@ -25,6 +25,11 @@ jobs:
       - name: Configure Docker
         run: gcloud auth configure-docker
         
+      - name: Authenticate to Google Cloud
+        run: |
+          gcloud auth activate-service-account --key-file=${{ secrets.GCP_SA_KEY }}
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+        
       - name: Get GKE Credentials
         run: |
           gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} \
