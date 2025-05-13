@@ -60,4 +60,6 @@ docker/
 
 push-docker-images.sh
 
+testing-kubernetes/
+
 
