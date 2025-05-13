@@ -31,24 +31,21 @@ jobs:
             --zone ${{ secrets.GKE_ZONE }} \
             --project ${{ secrets.GCP_PROJECT_ID }}
           
-      - name: Deploy Server
+      - name: Deploy All Kubernetes Resources
         run: |
-          kubectl apply -f ProductionSetup/server.yaml
+          # Apply all YAML files in ProductionSetup directory
+          kubectl apply -f ProductionSetup/
           
-      - name: Deploy Pod Deployment Service
+      - name: Verify Deployments
         run: |
-          kubectl apply -f ProductionSetup/podDeployment.yml
-          
-      - name: Deploy Frontend
-        run: |
-          kubectl apply -f ProductionSetup/frontend.yaml
-          
-      - name: Deploy Ingress
-        run: |
-          kubectl apply -f ProductionSetup/ingress.yaml
-          
-      - name: Verify Deployment
-        run: |
+          # Wait for all deployments to be ready
           kubectl rollout status deployment/frontend
           kubectl rollout status deployment/server
-          kubectl rollout status deployment/pod-deployment
+          kubectl rollout status deployment/poddeployment
+          
+      - name: Verify Other Resources
+        run: |
+          # Verify other resources are created
+          kubectl get all -n default
+          kubectl get ingress -n default
+          kubectl get resourcequota -n default
