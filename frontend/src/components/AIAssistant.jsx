@@ -42,10 +42,8 @@ const AIAssistant = ({ currentFile, fileContent, onApplyChanges, editorRef }) =>
 
     const updateSelection = () => {
       const selection = editor.getSelection();
-      console.log('Current selection:', selection);
       if (selection && !selection.isEmpty()) {
         const text = model.getValueInRange(selection);
-        console.log('Selected text:', text);
         setSelectedCode(text);
       } else {
         setSelectedCode('');
