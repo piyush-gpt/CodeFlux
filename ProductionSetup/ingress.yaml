@@ -9,13 +9,13 @@ metadata:
 spec:
   tls:
   - hosts:
-    - "codeflux.com"
-    - "www.codeflux.com"
-    - "api.codeflux.com"
-    - "poddeployment.codeflux.com"
+    - "codefluxcloud.in"
+    - "www.codefluxcloud.in"
+    - "api.codefluxcloud.in"
+    - "poddeployment.codefluxcloud.in"
     secretName: codeflux-tls
   rules:
-  - host: codeflux.com
+  - host: codefluxcloud.in
     http:
       paths:
       - path: /
@@ -24,8 +24,8 @@ spec:
           service:
             name: frontend
             port:
-              number: 5173
-  - host: www.codeflux.com
+              number: 80
+  - host: www.codefluxcloud.in
     http:
       paths:
       - path: /
@@ -34,8 +34,8 @@ spec:
           service:
             name: frontend
             port:
-              number: 5173
-  - host: api.codeflux.com
+              number: 80
+  - host: api.codefluxcloud.in
     http:
       paths:
       - path: /
@@ -45,7 +45,7 @@ spec:
             name: server
             port:
               number: 3000
-  - host: poddeployment.codeflux.com
+  - host: poddeployment.codefluxcloud.in
     http:
       paths:
       - path: /

@@ -89,7 +89,7 @@ export async function deployRepl(userId, replId, language) {
   const podName = `repl-${namePrefix}`;
   const serviceName = `svc-${namePrefix}`;
   const ingressName = `ing-${namePrefix}`;
-  const runnerDomain = `${namePrefix}.127.0.0.1.nip.io`;
+  const runnerDomain = `${namePrefix}.codefluxcloud.in`;
 
   let workerImage = 'piyushgpt/repl-worker';
   if (language.toLowerCase() === 'react' || language.toLowerCase() === 'reactjs') {
@@ -116,7 +116,7 @@ export async function deployRepl(userId, replId, language) {
           image: 'piyushgpt/repl-runner',
           ports: [{ containerPort: 3001 }],
           resources: {
-            limits: { cpu: '200m', memory: '512Mi' },
+            limits: { cpu: '150m', memory: '384Mi' },
             requests: { cpu: '100m', memory: '256Mi' },
           },
         },
@@ -124,10 +124,10 @@ export async function deployRepl(userId, replId, language) {
           name: 'worker',
           image: workerImage,
           ports: [{ containerPort: 3002 }, { containerPort: 5173 }],
-          env: [{ name: 'NODE_OPTIONS', value: '--max-old-space-size=768' }],
+          env: [{ name: 'NODE_OPTIONS', value: '--max-old-space-size=512' }],
           resources: {
-            limits: { cpu: '500m', memory: '1Gi' },
-            requests: { cpu: '200m', memory: '512Mi' },
+            limits: { cpu: '400m', memory: '512Mi' },
+            requests: { cpu: '200m', memory: '384Mi' },
           },
           volumeMounts: [{ name: 'workspace-volume', mountPath: '/workspace' }],
         },

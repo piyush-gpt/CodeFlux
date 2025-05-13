@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: codefluxcloud-in
+  namespace: default
+spec:
+  secretName: codefluxcloud-in-tls
+  issuerRef:
+    name: letsencrypt-prod
+  commonName: codefluxcloud.in
+  dnsNames:
+  - codefluxcloud.in
+  - www.codefluxcloud.in
+  - api.codefluxcloud.in
+  - poddeployment.codefluxcloud.in
