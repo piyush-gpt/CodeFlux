@@ -67,7 +67,7 @@ jobs:
           for file in ProductionSetup/*.y*ml; do
             if [ -f "$file" ]; then
               # Replace image tags with new version
-              sed -i "s|image: ${{ secrets.DOCKERHUB_USERNAME }}/repl-.*:.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/repl-\\1:${{ env.SHA }}|g" "$file"
+              sed -i "s|image: ${{ secrets.DOCKERHUB_USERNAME }}/repl-\([^:]*\):.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/repl-\1:${{ env.SHA }}|g" "$file"
             fi
           done
           
