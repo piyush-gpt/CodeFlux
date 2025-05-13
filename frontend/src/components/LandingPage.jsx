@@ -6,7 +6,7 @@ import { Code, Zap, Users, Terminal, ArrowRight } from 'lucide-react';
 const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
-      {/* Navigation */}
+      
       <nav className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
