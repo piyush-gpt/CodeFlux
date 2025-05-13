@@ -44,7 +44,6 @@ router.post('/assist', async (req, res) => {
       contents: formatPrompt(prompt, fileContent, filePath, language)
     });
     
-    // Stream the response chunks
     for await (const chunk of result) {
       res.write(`data: ${JSON.stringify({ text: chunk.text })}\n\n`);
     }
