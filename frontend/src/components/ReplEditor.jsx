@@ -380,7 +380,6 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
 
     setFileContent(value);
 
-    // Update cache
     setFileCache(prev => ({
       ...prev,
       [currentFile.path]: value
