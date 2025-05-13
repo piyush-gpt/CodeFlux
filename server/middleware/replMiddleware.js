@@ -15,7 +15,7 @@ const replAuth = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
 
-    req.repl = repl; // Attach REPL to the request object
+    req.repl = repl;
     next();
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
