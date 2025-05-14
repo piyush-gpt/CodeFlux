@@ -31,11 +31,11 @@ spec:
             name: codeflux-config
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "100m"
+            memory: "80Mi"
+            cpu: "10m"
           limits:
-            memory: "256Mi"
-            cpu: "200m"
+            memory: "160Mi"
+            cpu: "100m"
 ---
 apiVersion: v1
 kind: Service

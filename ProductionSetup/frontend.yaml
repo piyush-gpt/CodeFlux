@@ -22,11 +22,11 @@ spec:
         - containerPort: 80
         resources:
           requests:
-            memory: "64Mi"
-            cpu: "100m"
+            memory: "8Mi"
+            cpu: "10m"
           limits:
-            memory: "128Mi"
-            cpu: "200m"
+            memory: "32Mi"
+            cpu: "100m"
         envFrom:
         - configMapRef:
             name: codeflux-config
