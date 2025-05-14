@@ -340,7 +340,7 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
 
   const checkPreviewAvailability = async () => {
     try {
-      const response = await fetch(`http://${domain}/`, {
+      const response = await fetch(`https://${domain}/`, {
         method: 'HEAD',
         mode: 'no-cors'
       });
