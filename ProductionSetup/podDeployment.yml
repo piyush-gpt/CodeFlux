@@ -18,7 +18,7 @@ spec:
       serviceAccountName: poddeployment-sa
       containers:
       - name: poddeployment
-        image: piyushgpt/repl-pod-deployment:fab9e7cda1b1d3b4cba479821ab2af7b021313b6
+        image: piyushgpt/repl-pod-deployment:bfe38f0d833a2726e8e45722e8de65eea4d077da
         ports:
         - containerPort: 4001
         env:
