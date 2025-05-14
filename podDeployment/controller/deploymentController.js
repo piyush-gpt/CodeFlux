@@ -126,8 +126,8 @@ export async function deployRepl(userId, replId, language) {
           ports: [{ containerPort: 3002 }, { containerPort: 5173 }],
           env: [{ name: 'NODE_OPTIONS', value: '--max-old-space-size=512' }],
           resources: {
-            limits: { cpu: '200m', memory: '256Mi' },
-            requests: { cpu: '20m', memory: '128Mi' },
+            limits: { cpu: '200m', memory: '512Mi' },
+            requests: { cpu: '20m', memory: '256Mi' },
           },
           volumeMounts: [{ name: 'workspace-volume', mountPath: '/workspace' }],
         },
