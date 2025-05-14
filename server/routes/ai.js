@@ -36,8 +36,7 @@ router.post('/assist', async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-    
-    // Generate streaming content
+  
     const result = await genAI.models.generateContentStream({
       model: "gemini-2.0-flash",
       config: config,
