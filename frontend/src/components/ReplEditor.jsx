@@ -31,7 +31,7 @@ function useSocket(ownerId, userId, replId, domain, username) {
   useEffect(() => {
     if (!domain) return; // Only connect when we have a domain
 
-    const socketUrl = `http://${domain}`;
+    const socketUrl = `https://${domain}`;
     console.log(`Connecting to socket at ${socketUrl}`);
 
     const newSocket = io(socketUrl, {

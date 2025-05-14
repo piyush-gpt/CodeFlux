@@ -186,6 +186,12 @@ export async function deployRepl(userId, replId, language) {
     },
     spec: {
       ingressClassName: 'nginx',
+      tls: [
+        {
+          hosts: ['*.codefluxcloud.in'],
+          secretName: 'codefluxcloud-in-tls'
+        }
+      ],
       rules: [
         {
           host: runnerDomain,

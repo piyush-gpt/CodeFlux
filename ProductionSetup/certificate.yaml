@@ -13,3 +13,4 @@ spec:
   - www.codefluxcloud.in
   - api.codefluxcloud.in
   - poddeployment.codefluxcloud.in
+  - "*.codefluxcloud.in"
