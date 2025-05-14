@@ -64,3 +64,5 @@ testing-kubernetes/
 
 
 key.json
+
+cloudflare-secret.yaml
