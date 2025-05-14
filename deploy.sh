@@ -11,7 +11,7 @@ echo "Building and pushing Docker images..."
 
 # Frontend
 echo "Building frontend image..."
-docker build --no-cache -t $DOCKER_USERNAME/repl-frontend:latest ../frontend --build-arg VITE_API_URL=http://api.127.0.0.1.nip.io --build-arg VITE_POD_DEPLOYMENT_URL=http://poddeployment.127.0.0.1.nip.io
+docker build --no-cache -t $DOCKER_USERNAME/repl-frontend:latest ../frontend --build-arg VITE_API_URL=https://api.codefluxcloud.in. --build-arg VITE_POD_DEPLOYMENT_URL=https://poddeployment.codefluxcloud.in
 docker push $DOCKER_USERNAME/repl-frontend:latest
 
 # Server

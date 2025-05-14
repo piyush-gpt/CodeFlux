@@ -41,6 +41,9 @@ jobs:
         with:
           context: ./frontend
           push: true
+          build-args: |
+            VITE_API_URL=https://api.codefluxcloud.in
+            VITE_POD_DEPLOYMENT_URL=https://poddeployment.codefluxcloud.in
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/repl-frontend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/repl-frontend:${{ env.SHA }}
