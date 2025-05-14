@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: piyushgpt/repl-server:b69405f7e1fc018a3d294bf24d69c7a0df723f54
+        image: piyushgpt/repl-server:d13a567153e684093ef162c2b251a6d8e4034fb1
         ports:
         - containerPort: 3000
         env:
