@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: buypass-prod
+spec:
+  acme:
+    email: piyushthegreat@gmail.com
+    server: https://api.buypass.com/acme/directory
+    privateKeySecretRef:
+      name: buypass-prod
+    solvers:
+    - dns01:
+        cloudflare:
+          email: piyushthegreat@gmail.com
+          apiTokenSecretRef:
+            name: cloudflare-api-token-secret
+            key: api-token 

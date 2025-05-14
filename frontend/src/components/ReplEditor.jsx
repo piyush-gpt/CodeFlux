@@ -662,7 +662,7 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
                 >
                   <div className="absolute top-2 right-2 z-10">
                     <a
-                      href={`http://${domain}/preview`}
+                      href={`https://${domain}/preview`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 bg-gray-700  text-black hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-2 text-sm"
@@ -672,7 +672,7 @@ const ReplEditorContent = ({ domain, ownerId, repl }) => {
                     </a>
               </div>
                   <iframe
-                    src={`http://${domain}/preview`}
+                    src={`https://${domain}/preview`}
                     className="w-full h-full"
                     title="Preview"
                   />
