@@ -57,7 +57,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      
       <section className="container mx-auto px-6 py-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <motion.div 
