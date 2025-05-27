@@ -8,7 +8,7 @@ import { startReplExpirationWatcher } from './controller/deploymentController.js
 const app = express();
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL,
+  origin: ['https://www.codefluxcloud.in', 'https://codefluxcloud.in'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 };
