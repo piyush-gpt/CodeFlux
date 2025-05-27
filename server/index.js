@@ -30,7 +30,7 @@ app.use(compression());
 app.use(morgan('combined'));
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL ,
+  origin: ['https://www.codefluxcloud.in', 'https://codefluxcloud.in'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
