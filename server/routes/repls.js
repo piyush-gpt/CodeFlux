@@ -47,13 +47,6 @@ router.post('/', auth, async (req, res) => {
       name: name 
     });
 
-    if (existing) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'You already have a REPL with this name' 
-      });
-    }
-
     const repl = await Repl.create({
       name,
       language,

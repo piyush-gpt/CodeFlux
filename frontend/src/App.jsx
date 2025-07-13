@@ -26,14 +26,7 @@ const App = () => (
               </ProtectedRoute>
             } 
           />
-          <Route 
-            path="/repl/:id/:lang" 
-            element={
-              <ProtectedRoute>
-                <ReplEditor />
-              </ProtectedRoute>
-            } 
-          />
+          
         </Routes>
       </Router>
     </AuthProvider>
