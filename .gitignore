@@ -53,11 +53,4 @@ runner/
 codefluxConfigMap.yaml
 codefluxSecrets.yaml
 
-docker/
 
-push-docker-images.sh
-
-testing-kubernetes/
-
-
-key.json
