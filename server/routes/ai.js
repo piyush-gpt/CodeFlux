@@ -32,7 +32,6 @@ router.post('/assist', async (req, res) => {
   try {
     const { prompt, fileContent, filePath, language } = req.body;
     
-    // Set up streaming response
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
