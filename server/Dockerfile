@@ -1,7 +1,6 @@
 # Use Node.js LTS
 FROM node:18-alpine
 
-# Create app directory
 WORKDIR /app
 
 # Copy package files
