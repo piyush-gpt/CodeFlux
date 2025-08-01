@@ -145,7 +145,6 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not authorized to delete this REPL' });
     }
 
-    // Delete associated collaborations
     await Collaboration.deleteMany({ repl: repl._id });
 
     // Delete files from S3
