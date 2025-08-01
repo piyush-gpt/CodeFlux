@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: piyushgpt/repl-frontend:77cc6c3eef5c68ebf28b4c76b1e92a171ecb6315
+        image: piyushgpt/repl-frontend:b68ca031d266c7796a9c939303fcb1ac6e3b21c5
         ports:
         - containerPort: 80
         resources:
